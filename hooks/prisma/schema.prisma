@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String
+  password String
+  // user can have multiple zaps
+  zaps     Zap[]
+}
+
+model Zap {
+  id        String   @id @default(uuid())
+  triggerId String
+  // only one user will be linked to a zap --> many to one relation
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  // a zap has only one trigger
+  trigger   Trigger?
+  // a zap will have multiple actions
+  actions   Action[]
+  // a zap will have multiple runs
+  zapRuns   ZapRun[]
+}
+
+model Trigger {
+  id            String           @id @default(uuid())
+  // is linked to only 1 zap --> one to one relation
+  zap           Zap              @relation(fields: [zapId], references: [id])
+  zapId         String           @unique
+  // is the main content info for a trigger
+  metadata      Json             @default("{}")
+  // trigger can be only of one type from the available selection --> one to many relation
+  type          AvailableTrigger @relation(fields: [triggerTypeId], references: [id])
+  triggerTypeId String
+}
+
+model Action {
+  id           String          @id @default(uuid())
+  // each zap can have multiple actions --> one to many
+  zap          Zap             @relation(fields: [zapId], references: [id])
+  zapId        String
+  // action types --> one to many relations
+  type         AvailableAction @relation(fields: [actionTypeId], references: [id])
+  actionTypeId String
+  // importand metadata for the actions
+  metadata     Json            @default("{}")
+  sortingOrder Int             @default(0)
+}
+
+model AvailableAction {
+  id      String   @id @default(uuid())
+  name    String
+  image   String
+  actions Action[]
+}
+
+model AvailableTrigger {
+  id       String    @id @default(uuid())
+  name     String
+  image    String
+  triggers Trigger[]
+}
+
+// table contains the zap run details
+model ZapRun {
+  id           String        @id @default(uuid())
+  zapId        String
+  metadata     Json
+  zap          Zap           @relation(fields: [zapId], references: [id])
+  zapRunOutbox ZapRunOutbox?
+}
+
+// table contains the things to be sent to the queue
+model ZapRunOutbox {
+  id       String @id @default(uuid())
+  zapRunId String @unique
+  zapRun   ZapRun @relation(fields: [zapRunId], references: [id])
+}
