@@ -10,11 +10,11 @@ const kafkaClient = new Kafka({
     brokers: ['localhost:9092']
 })
 
-async function mainFunction(){
+async function mainFunction() {
     const producer = kafkaClient.producer();
     await producer.connect()
 
-    while(1){
+    while (1) {
         // reads 10 rows from the ZapRunOutbox
         const pendingRows = await prismaClient.zapRunOutbox.findMany({
             where: {},
@@ -22,14 +22,14 @@ async function mainFunction(){
         });
 
         console.log(pendingRows);
-        
+
         // sends the 10 rows to the queue
         producer.send({
             topic: TOPIC_NAME,
-            messages: pendingRows.map((r: { zapRunId: String; }) =>{
+            messages: pendingRows.map((r: { zapRunId: String; }) => {
                 return {
                     value: JSON.stringify({
-                        zapRunId: r.zapRunId, 
+                        zapRunId: r.zapRunId,
                         stage: 0
                     })
                 }
@@ -38,7 +38,7 @@ async function mainFunction(){
 
         // deletes the 10 rows from the ZapRunOutbox table
         await prismaClient.zapRunOutbox.deleteMany({
-            where:{
+            where: {
                 id: {
                     in: pendingRows.map((x: { id: any }) => x.id)
                 }
@@ -46,7 +46,7 @@ async function mainFunction(){
         })
 
         // wait for 3 seconds after processing 1 session
-        await new Promise(r=>setTimeout(r, 3000));
+        await new Promise(r => setTimeout(r, 3000));
     }
 }
 
