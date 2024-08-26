@@ -44,8 +44,8 @@ model Trigger {
   // is the main content info for a trigger
   metadata      Json             @default("{}")
   // trigger can be only of one type from the available selection --> one to many relation
-  type          AvailableTrigger @relation(fields: [triggerTypeId], references: [id])
-  triggerTypeId String
+  type          AvailableTrigger @relation(fields: [triggerId], references: [id])
+  triggerId String
 }
 
 model Action {
@@ -54,8 +54,8 @@ model Action {
   zap          Zap             @relation(fields: [zapId], references: [id])
   zapId        String
   // action types --> one to many relations
-  type         AvailableAction @relation(fields: [actionTypeId], references: [id])
-  actionTypeId String
+  type         AvailableAction @relation(fields: [actionId], references: [id])
+  actionId String
   // importand metadata for the actions
   metadata     Json            @default("{}")
   sortingOrder Int             @default(0)

@@ -2,7 +2,7 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const app = express();
-const PORT = 3000;
+const PORT = 3002;
 const client = new PrismaClient()
 
 app.use(express.json());
@@ -38,5 +38,5 @@ app.post("/hooks/catch/:userId/:zapId", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log("Prisma backend started on port 3000")
+    console.log("Prisma backend started on port", PORT)
 })

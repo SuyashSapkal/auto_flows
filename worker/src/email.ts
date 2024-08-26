@@ -4,21 +4,21 @@ import nodemailer from "nodemailer";
 // SMTP_PASSWORD=""
 // SMTP_ENDPOINT
 
+const user = process.env.SMTP_USERNAME;
+const pass = process.env.SMTP_PASSWORD;
+
 const transport = nodemailer.createTransport({
-    host: process.env.SMTP_ENDPOINT,
-    port: 587,
-    secure: false, // upgrade later with STARTTLS
+    service: "gmail",
     auth: {
-        user: process.env.SMTP_USERNAME,
-        pass: process.env.SMTP_PASSWORD,
+        user: user,
+        pass: pass,
     },
 });
 
 export async function sendEmail(to: string, body: string) {
     await transport.sendMail({
-        from: "suyashsapkal21@gmail.com",
-        sender: "suyashsapkal21@gmail.com",
-        to,
+        from: user,
+        to: to,
         subject: "Hello, from the zapier_clone_app",
         text: body
     })
